@@ -8,12 +8,17 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
+    }
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
@@ -34,5 +39,4 @@ public class UserService {
 
         return new User(userDTO.getName(), userDTO.getEmail(), userDTO.getCPF(), birthDate);
     }
-
 }
