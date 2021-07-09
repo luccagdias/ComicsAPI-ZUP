@@ -3,6 +3,8 @@ package com.zup.desafio.comicsapi.model;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class User {
@@ -24,6 +26,14 @@ public class User {
 
     @NotNull
     private LocalDate birthDate;
+
+    @ManyToMany
+    @JoinTable(
+            name = "USER_COMIC",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "comic_id")
+    )
+    private List<Comic> userComics = new ArrayList<>();
 
     public User() {
     }
@@ -73,5 +83,13 @@ public class User {
 
     public void setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
+    }
+
+    public List<Comic> getUserComics() {
+        return userComics;
+    }
+
+    public void setUserComics(List<Comic> userComics) {
+        this.userComics = userComics;
     }
 }

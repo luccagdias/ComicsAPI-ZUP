@@ -3,6 +3,7 @@ package com.zup.desafio.comicsapi.controller.exceptions;
 import com.zup.desafio.comicsapi.controller.exceptions.util.FieldMessage;
 import com.zup.desafio.comicsapi.controller.exceptions.util.StandardError;
 import com.zup.desafio.comicsapi.controller.exceptions.util.ValidationError;
+import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -35,5 +36,13 @@ public class ControllerExceptionHandler {
             }
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
+    }
+
+    @ExceptionHandler(ObjectNotFoundException.class)
+    public ResponseEntity<StandardError> objectNotFound(ObjectNotFoundException e, HttpServletRequest request) {
+
+        StandardError err = new StandardError(HttpStatus.NOT_FOUND.value(), e.getMessage(), new Date());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
     }
 }

@@ -2,8 +2,12 @@ package com.zup.desafio.comicsapi.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zup.desafio.comicsapi.controller.exceptions.ObjectNotFoundException;
 import com.zup.desafio.comicsapi.model.Comic;
+import com.zup.desafio.comicsapi.model.User;
 import com.zup.desafio.comicsapi.repository.ComicRepository;
+import com.zup.desafio.comicsapi.repository.UserRepository;
+import net.bytebuddy.implementation.auxiliary.AuxiliaryType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +19,28 @@ public class ComicService {
     @Autowired
     private ComicRepository comicRepository;
 
-    public Comic insert(Object marvelApiResponse) {
+    @Autowired
+    private UserRepository userRepository;
 
-        Comic comic = getComicObjectFromMarvelResponseData(marvelApiResponse);
-        return comicRepository.save(comic);
+    public Comic findByIdFromMarvel(Long marvelId) {
+        return comicRepository.findByIdFromMarvel(marvelId);
     }
 
-    private Comic getComicObjectFromMarvelResponseData(Object marvelApiResponse) {
+    public Comic insert(Object marvelApiResponse, Long userId) throws ObjectNotFoundException {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ObjectNotFoundException("Usuário indicado não encontrado"));
+
+        Comic comicFromMarvelResponseData = buildComicObjectFromMarvelResponseData(marvelApiResponse);
+        Comic comic = findByIdFromMarvel(comicFromMarvelResponseData.getIdFromMarvel());
+        if (comic == null) {
+            comic = comicRepository.save(comicFromMarvelResponseData);
+        }
+
+        addComicForUser(comic, user);
+
+        return comic;
+    }
+
+    private Comic buildComicObjectFromMarvelResponseData(Object marvelApiResponse) {
         JsonNode resultsNodeAttributes = getComicsAttributesFromJsonResponse(marvelApiResponse);
 
         Long idFromMarvel = resultsNodeAttributes.get("id").asLong();
@@ -56,6 +75,11 @@ public class ComicService {
         }
 
         return creatorsNames.toString();
+    }
+
+    private void addComicForUser(Comic comic, User user) {
+        user.getUserComics().add(comic);
+        userRepository.save(user);
     }
 }
 
