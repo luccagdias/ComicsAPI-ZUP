@@ -1,14 +1,17 @@
 package com.zup.desafio.comicsapi.service;
 
+import com.zup.desafio.comicsapi.controller.exceptions.ObjectNotFoundException;
+import com.zup.desafio.comicsapi.model.Comic;
 import com.zup.desafio.comicsapi.model.User;
 import com.zup.desafio.comicsapi.model.dto.UserDTO;
 import com.zup.desafio.comicsapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -16,8 +19,19 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
+    public User findById(Long id) throws ObjectNotFoundException {
+        User user = userRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Usuário não está registrado"));
+
+        List<Comic> comics = user.getUserComics();
+
+        comics.stream().forEach(comic -> {
+            if (comic.isActiveDiscount()) {
+                Double actualPrice = comic.getPrice();
+                comic.setPrice(actualPrice - (actualPrice * 0.10));
+            }
+        });
+
+        return user;
     }
 
     public User findByEmail(String email) {

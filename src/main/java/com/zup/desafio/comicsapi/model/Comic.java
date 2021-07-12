@@ -1,9 +1,8 @@
 package com.zup.desafio.comicsapi.model;
 
-import org.springframework.cloud.openfeign.EnableFeignClients;
-
 import javax.persistence.*;
-import java.util.List;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 
 @Entity
 public class Comic {
@@ -25,6 +24,10 @@ public class Comic {
     @Column(length = 1000)
     private String description;
 
+    private DayOfWeek discountDay;
+
+    private boolean isActiveDiscount;
+
     public Comic() {
     }
 
@@ -36,6 +39,8 @@ public class Comic {
         this.creators = creators;
         this.isbn = isbn;
         this.description = description;
+
+        setDiscountDay(this.isbn);
     }
 
     public Long getId() {
@@ -93,4 +98,40 @@ public class Comic {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public DayOfWeek getDiscountDay() {
+        return discountDay;
+    }
+
+    private void setDiscountDay(String isbn) {
+        if (isbn != null && !isbn.equals("")) {
+            String isbnLastDigit = isbn.substring(isbn.length() - 1);
+
+            if (isbnLastDigit.equals("0") || isbnLastDigit.equals("1")) {
+                this.discountDay = DayOfWeek.MONDAY;
+            }
+
+            if (isbnLastDigit.equals("2") || isbnLastDigit.equals("3")) {
+                this.discountDay = DayOfWeek.TUESDAY;
+            }
+
+            if (isbnLastDigit.equals("4") || isbnLastDigit.equals("5")) {
+                this.discountDay = DayOfWeek.WEDNESDAY;
+            }
+
+            if (isbnLastDigit.equals("6") || isbnLastDigit.equals("7")) {
+                this.discountDay = DayOfWeek.THURSDAY;
+            }
+
+            if (isbnLastDigit.equals("8") || isbnLastDigit.equals("9")) {
+                this.discountDay = DayOfWeek.FRIDAY;
+            }
+        }
+    }
+
+    public boolean isActiveDiscount() {
+        isActiveDiscount = this.discountDay == LocalDate.now().getDayOfWeek();
+        return isActiveDiscount;
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.zup.desafio.comicsapi.controller;
 
 import com.zup.desafio.comicsapi.controller.exceptions.FieldAlreadyRegisteredException;
+import com.zup.desafio.comicsapi.controller.exceptions.ObjectNotFoundException;
 import com.zup.desafio.comicsapi.controller.exceptions.util.FieldMessage;
 import com.zup.desafio.comicsapi.model.User;
 import com.zup.desafio.comicsapi.model.dto.UserDTO;
@@ -24,8 +25,8 @@ public class UserController {
     private UserService service;
 
     @GetMapping("/{userId}")
-    public ResponseEntity<Optional<User>> findById(@PathVariable("userId") Long id) {
-        Optional<User> user = service.findById(id);
+    public ResponseEntity<User> findById(@PathVariable("userId") Long id) throws ObjectNotFoundException {
+        User user = service.findById(id);
 
         return ResponseEntity.ok().body(user);
     }
